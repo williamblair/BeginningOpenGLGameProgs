@@ -1,0 +1,287 @@
+#include <fstream>
+#include <iostream>
+#include <HeightMap.h>
+
+HeightMap::HeightMap()
+{
+    width = 0;
+    vertexBuffer = 0;
+    normalBuffer = 0;
+    texCoordBuffer = 0;
+    indexBuffer = 0;
+    colorBuffer = 0;
+}
+
+HeightMap::~HeightMap()
+{
+    if (vertexBuffer != 0) glDeleteBuffers(1, &vertexBuffer);
+    if (texCoordBuffer != 0) glDeleteBuffers(1, &texCoordBuffer);
+    if (colorBuffer != 0) glDeleteBuffers(1, &colorBuffer);
+    if (normalBuffer != 0) glDeleteBuffers(1, &normalBuffer);
+    if (indexBuffer != 0) glDeleteBuffers(1, &indexBuffer);
+}
+
+bool HeightMap::Load(const std::string& rawFileName,
+                     const unsigned int width,
+                     const float heightScale,
+                     const float sizeScale)
+{
+    this->width = width;
+
+    std::ifstream rawFile(rawFileName, std::ios::binary);
+    if (!rawFile.is_open()) {
+        std::cerr << __func__ << ": failed to open " << rawFileName << std::endl;
+        return false;
+    }
+    std::vector<uint8_t> fileBytes;
+    rawFile.seekg(0, std::ios::end);
+    size_t fileSize = rawFile.tellg();
+    rawFile.seekg(0, std::ios::beg);
+    fileBytes.resize(fileSize);
+    rawFile.read((char*)fileBytes.data(), fileBytes.size());
+    if (fileBytes.size() != width * width) {
+        std::cerr << "File size bytes != width*width" << std::endl;
+        return false;
+    }
+
+    heights.resize(width * width);
+    colors.resize(width * width);
+    for (size_t i = 0; i < heights.size(); ++i) {
+        heights[i] = (((float)fileBytes[i]) / 256.0f) * heightScale;
+        colors[i].x = 0.0f;
+        colors[i].y = ((float)fileBytes[i]) / 256.0f;
+        colors[i].z = 0.0f;
+    }
+
+    GenerateVertices(sizeScale);
+    GenerateTexCoords();
+    GenerateIndices();
+    GenerateNormals();
+    GenerateBuffers();
+
+    return true;
+}
+
+void HeightMap::GenerateVertices(const float sizeScale)
+{
+    size_t i = 0;
+    positions.resize(width * width);
+    for (float z = float(-((int)width) / 2); z <= (int)width / 2; z++) {
+        for (float x = float(-((int)width) / 2); x <= (int)width / 2; x++) {
+            if (i >= positions.size()) {
+                std::cerr << "INVALID I!!!!" << std::endl;
+                return;
+            }
+            positions[i].x = x;
+            positions[i].y = heights[i];
+            positions[i].z = z;
+            i++;
+        }
+    }
+}
+
+void HeightMap::GenerateTexCoords()
+{
+    texCoords.clear();
+    for (int z = 0; z < width; ++z) {
+        for (int x = 0; x < width; ++x) {
+            float s = (float(x) / float(width)) * 8.0f;
+            float t = (float(z) / float(width)) * 8.0f;
+            texCoords.push_back(Vec2(s,t));
+        }
+    }
+}
+
+void HeightMap::GenerateNormals()
+{
+    std::vector<Vec3> faceNormals; // tmp calculation
+    std::vector<int> shareCount;
+
+    normals.resize(positions.size());
+    shareCount.resize(positions.size());
+
+    for (size_t i = 0; i < shareCount.size(); ++i) {
+        shareCount[i] = 0;
+    }
+
+    size_t numTriangles = indices.size() / 3;
+    faceNormals.resize(numTriangles);
+    
+    for (unsigned int i = 0; i < numTriangles; ++i) {
+        Vec3* v1 = &positions[indices[(i*3) + 0]];
+        Vec3* v2 = &positions[indices[(i*3) + 1]];
+        Vec3* v3 = &positions[indices[(i*3) + 2]];
+
+        Vec3 vec1, vec2;
+
+        vec1.x = v2->x - v1->x;
+        vec1.y = v2->y - v1->y;
+        vec1.z = v2->z - v1->z;
+
+        vec2.x = v3->x - v1->x;
+        vec2.y = v3->y - v1->y;
+        vec2.z = v3->z - v1->z;
+
+        Vec3* normal = &faceNormals[i];
+        *normal = cross(vec1, vec2);
+        normalize(*normal);
+
+        for (int j = 0; j < 3; ++j) {
+            int index = indices[(i*3) + j];
+            normals[index].x += normal->x;
+            normals[index].y += normal->y;
+            normals[index].z += normal->z;
+            shareCount[index]++;
+        }
+    }
+
+    for (unsigned int i = 0; i < positions.size(); ++i) {
+        normals[i].x = normals[i].x / shareCount[i];
+        normals[i].y = normals[i].y / shareCount[i];
+        normals[i].z = normals[i].z / shareCount[i];
+        normalize(normals[i]);
+    }
+}
+
+void HeightMap::GenerateIndices()
+{
+    /*
+        We loop through building the triangles that
+        make up each grid square in the heightmap
+
+        (z*w+x) *----* (z*w+x+1)
+                |   /| 
+                |  / | 
+                | /  |
+        ((z+1)*w+x)*----* ((z+1)*w+x+1)
+    */
+    indices.clear();
+    for (int z = 0; z < width - 1; ++z) {
+        for (int x = 0; x < width - 1; ++x) {
+            indices.push_back(z     * width + x);
+            indices.push_back((z+1) * width + x);
+            indices.push_back(z     * width + x + 1);
+
+            indices.push_back((z+1) * width + x);
+            indices.push_back((z+1) * width + x + 1);
+            indices.push_back(z     * width + x + 1);
+        }
+    }
+}
+
+void HeightMap::GenerateBuffers()
+{
+    vertexBuffer = 0;
+    glCreateBuffers(1, &vertexBuffer);
+    if (!vertexBuffer) {
+        std::cerr << __func__ << " failed to gen vertex buffer" << std::endl;
+        return;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 positions.size()*sizeof(Vec3),
+                 (void*)positions.data(), 
+                 GL_STATIC_DRAW);
+
+    normalBuffer = 0;
+    glCreateBuffers(1, &normalBuffer);
+    if (!normalBuffer) {
+        std::cerr << __func__ << " failed to gen normal buffer" << std::endl;
+        return;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 normals.size()*sizeof(Vec3),
+                 (void*)normals.data(), 
+                 GL_STATIC_DRAW);
+
+    texCoordBuffer = 0;
+    glCreateBuffers(1, &texCoordBuffer);
+    if (!texCoordBuffer) {
+        std::cerr << __func__ << " failed to gen tex coord buffer" << std::endl;
+        return;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 texCoords.size()*sizeof(Vec2),
+                 (void*)texCoords.data(), 
+                 GL_STATIC_DRAW);
+
+    colorBuffer = 0;
+    glCreateBuffers(1, &colorBuffer);
+    if (!colorBuffer) {
+        std::cerr << __func__ << " failed to gen vertex buffer" << std::endl;
+        return;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 colors.size()*sizeof(Vec3),
+                 (void*)colors.data(), 
+                 GL_STATIC_DRAW);
+
+    indexBuffer = 0;
+    glCreateBuffers(1, &indexBuffer);
+    if (!indexBuffer) {
+        std::cerr << __func__ << " failed to gen index buffer" << std::endl;
+        return;
+    } 
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indices.size()*sizeof(uint32_t), 
+                 (void*)indices.data(),
+                 GL_STATIC_DRAW);
+}
+
+void HeightMap::Draw(Shader& shader)
+{
+    shader.Bind();
+    GLuint aPosition = shader.GetAttribute("aPosition");
+    GLuint aNormal = shader.GetAttribute("aNormal");
+    GLuint aTexCoord0 = shader.GetAttribute("aTexCoord0");
+    GLuint aColor = shader.GetAttribute("aColor");
+    
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glVertexAttribPointer(aPosition,
+                          3, // Vec3 x,y,z
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glEnableVertexAttribArray(aPosition);
+
+    glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+    glVertexAttribPointer(aNormal,
+                          3, // Vec3 x,y,z
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glEnableVertexAttribArray(aNormal);
+
+    glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+    glVertexAttribPointer(aTexCoord0,
+                          2, // Vec2 x,y
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glEnableVertexAttribArray(aTexCoord0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glVertexAttribPointer(aColor,
+                          3, // Vec3 x,y,z
+                          GL_FLOAT,
+                          GL_FALSE,
+                          0,
+                          0);
+    glEnableVertexAttribArray(aColor);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+}
+

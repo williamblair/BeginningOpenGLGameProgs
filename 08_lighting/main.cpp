@@ -80,10 +80,35 @@ int main(int argc, char *argv[])
 
     Mat4 modelMatrix = MakeModelMat(); // = identity matrix
 
-    shader.SetUniform("uModel", modelMatrix);
-    shader.SetUniform("uView", viewMatrix);
-    shader.SetUniform("uProjection", projectionMatrix);
-    shader.SetUniform("uTexture0", 0); // texture 0
+    Mat4 normalMatrix = inverse(transposed(modelMatrix));
+
+    Vec3 lightColor(1.0f,1.0f,1.0f);
+    Vec3 lightPos(0.0f,18.0f,0.0f);
+    Vec3 ambientColor(0.2f,0.2f,0.2f);
+
+
+    float lightPosZ = 0.0f;
+    float lightDir = 1.0f;
+    const float LIGHT_SPEED = 0.04f;
+#define UpdateLightPos()        \
+    if (lightPosZ > 20.0f) {    \
+        lightDir = -1.0f;       \
+    }                           \
+    if (lightPosZ < -40.0f) {   \
+        lightDir = 1.0f;        \
+    }                           \
+    lightPosZ += lightDir * LIGHT_SPEED * dt;   \
+    lightPos.z = lightPosZ
+
+#define UpdateUniforms() \
+    shader.SetUniform("uModel", modelMatrix);           \
+    shader.SetUniform("uView", viewMatrix);             \
+    shader.SetUniform("uProjection", projectionMatrix); \
+    shader.SetUniform("uNormal", normalMatrix);         \
+    shader.SetUniform("uTexture0", 0);                  \
+    shader.SetUniform("uLightColor", lightColor);       \
+    shader.SetUniform("uLightPos", lightPos);           \
+    shader.SetUniform("uAmbientColor", ambientColor)
 
     GLuint texID = MakeTexture(targaImage);
 
@@ -94,15 +119,18 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+        UpdateUniforms();
+
         heightMap.Draw(shader);
         
         Uint32 thisTicks = SDL_GetTicks();
         float dt = thisTicks - lastTicks;
         lastTicks = thisTicks;
+
+        UpdateLightPos();
         
         window.Update(dt);
 
-        SDL_Delay(1000.0/60.0);
     } while (!window.ShouldQuit());
 
     return 0;

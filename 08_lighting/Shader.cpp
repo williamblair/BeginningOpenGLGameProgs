@@ -95,6 +95,12 @@ void Shader::SetUniform(const std::string& name, int val)
     glUniform1i(id, val);
 }
 
+void Shader::SetUniform(const std::string& name, Vec3& vec)
+{
+    unsigned int id = GetUniform(name);
+    glUniform3fv(id, 1, (const GLfloat*)vec.v);
+}
+
 unsigned int Shader::GetHandle() { return progID; }
 
 std::string Shader::ReadFile(const std::string& path)

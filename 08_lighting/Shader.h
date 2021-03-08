@@ -28,6 +28,7 @@ public:
     unsigned int GetHandle();
 
     void SetUniform(const std::string& name, Mat4& mat);
+    void SetUniform(const std::string& name, Vec3& vec);
     void SetUniform(const std::string& name, int val);
 
 private:
