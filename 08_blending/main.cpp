@@ -12,19 +12,19 @@ inline float deg2rad(const float deg) {
     return deg * M_PI / 180.0f;
 }
 
-inline Mat4 MakeModelMat()
+inline Mat4 MakeModelMat(float angleDeg)
 {
     Transform moveDown;
     Transform rotate;
     Transform moveBack;
-    moveDown.position = Vec3(0.0f, -20.0f, 0.0f);
-    rotate.rotation = angleAxis(deg2rad(25.0f), Vec3(1.0f, 0.0f, 0.0f));
+    moveDown.position = Vec3(0.0f, -15.0f, 0.0f);
+    rotate.rotation = angleAxis(deg2rad(angleDeg), Vec3(0.0f, 1.0f, 0.0f));
     moveBack.position = Vec3(0.0f, 0.0f, -50.0f);
     
     Mat4 downMat = transformToMat4(moveDown);
     Mat4 rotateMat = transformToMat4(rotate);
     Mat4 moveBackMat = transformToMat4(moveBack);
-    return downMat * rotateMat * moveBackMat;
+    return downMat *  moveBackMat * rotateMat;
 }
 
 inline GLuint MakeTexture(Targa::Image& tgaImage)
@@ -52,8 +52,10 @@ int main(int argc, char *argv[])
 {
     Window window;
     Shader shader;
+    Shader waterShader;
     HeightMap heightMap;
-    Targa::Image targaImage;
+    Targa::Image grassTexture;
+    Targa::Image waterTexture;
 
     if (!window.Initialize("Hello World", 640, 480)) {
         return 1;
@@ -64,14 +66,20 @@ int main(int argc, char *argv[])
     glBindVertexArray(gVAO);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glDepthFunc(GL_LEQUAL);
 
     shader.Load("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+    waterShader.Load("shaders/waterVertex.glsl", "shaders/waterFragment.glsl");
     shader.Bind();
 
     if (!heightMap.Load("assets/heightmap.raw")) {
         return 1;
     }
-    if (!targaImage.Load("assets/grass.tga")) {
+    if (!grassTexture.Load("assets/grass.tga")) {
+        return 1;
+    }
+    if (!waterTexture.Load("assets/water.tga")) {
         return 1;
     }
 
@@ -82,7 +90,8 @@ int main(int argc, char *argv[])
 
     Mat4 viewMatrix; // = identity matrix
 
-    Mat4 modelMatrix = MakeModelMat(); // = identity matrix
+    float terrainAngle = 0.0f;
+    Mat4 modelMatrix = MakeModelMat(terrainAngle);
 
     Mat4 normalMatrix = inverse(transposed(modelMatrix));
 
@@ -104,7 +113,7 @@ int main(int argc, char *argv[])
     lightPosZ += lightDir * LIGHT_SPEED * dt;   \
     lightPos.z = lightPosZ
 
-#define UpdateUniforms() \
+#define UpdateTerrainUniforms() \
     shader.SetUniform("uModel", modelMatrix);           \
     shader.SetUniform("uView", viewMatrix);             \
     shader.SetUniform("uProjection", projectionMatrix); \
@@ -114,7 +123,14 @@ int main(int argc, char *argv[])
     shader.SetUniform("uLightPos", lightPos);           \
     shader.SetUniform("uAmbientColor", ambientColor)
 
-    GLuint texID = MakeTexture(targaImage);
+#define UpdateWaterUniforms()                                   \
+    waterShader.SetUniform("uModel", modelMatrix);              \
+    waterShader.SetUniform("uView", viewMatrix);                \
+    waterShader.SetUniform("uProjection", projectionMatrix);    \
+    waterShader.SetUniform("uTexture0", 0)                   
+
+    GLuint grassTexID = MakeTexture(grassTexture);
+    GLuint waterTexID = MakeTexture(waterTexture);
 
     Uint32 lastTicks = SDL_GetTicks();
     do
@@ -122,14 +138,25 @@ int main(int argc, char *argv[])
         glClearColor(0.1, 0.2, 0.3, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        UpdateUniforms();
-
+        shader.Bind();
+        UpdateTerrainUniforms();
+        glBindTexture(GL_TEXTURE_2D, grassTexID);
         heightMap.Draw(shader);
+
+        waterShader.Bind();
+        UpdateWaterUniforms();
+        glBindTexture(GL_TEXTURE_2D, waterTexID);
+        heightMap.DrawWater(waterShader);
         
         Uint32 thisTicks = SDL_GetTicks();
         float dt = thisTicks - lastTicks;
         lastTicks = thisTicks;
+
+        terrainAngle += 0.01f * dt;
+        if (terrainAngle >= 360.0f) {
+            terrainAngle -= 360.0f;
+        }
+        modelMatrix = MakeModelMat(terrainAngle);
 
         UpdateLightPos();
         

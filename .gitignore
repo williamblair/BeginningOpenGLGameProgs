@@ -1,2 +1,6 @@
 opengl3
 *main
+*.exe
+*.dll
+*-config
+
