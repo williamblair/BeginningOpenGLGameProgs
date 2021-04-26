@@ -8,7 +8,9 @@ SOURCES=main.cpp          \
         HeightMap.cpp     \
         TargaImage.cpp    \
 		Tree.cpp          \
-        FreetypeFont.cpp
+        FreetypeFont.cpp  \
+        Md2Model.cpp      \
+        Explosion.cpp
 TARGET=main
 
 all:

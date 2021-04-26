@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-g -std=c++11
-INCDIRS=-I.
+INCDIRS=-I. -I/usr/include/freetype2
 LIBDIRS=
 LIBS=-lSDL2 -lGLEW -lGL -lfreetype
 SOURCES=main.cpp          \
