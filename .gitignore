@@ -3,4 +3,4 @@ opengl3
 *.exe
 *.dll
 *-config
-
+*.o

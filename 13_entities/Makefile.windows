@@ -1,0 +1,23 @@
+CC=D:/MinGW/bin/mingw32-g++
+CFLAGS=-std=c++11 -g
+INCDIRS=-I. -I..
+LIBDIRS=-LD:/MinGW/lib
+LIBS=-lmingw32 -lSDL2 -lglew32 -lopengl32 -lfreetype
+OBJS=main.o            \
+     Shader.o          \
+     HeightMap.o       \
+     TargaImage.o      \
+     Tree.o            \
+     FreetypeFont.o    \
+     Md2Model.o        \
+     Explosion.o       \
+     GameWorld.o       \
+     Entity.o          \
+     Enemy.o           \
+     Ogro.o
+TARGET=main
+all: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(INCDIRS) $(LIBDIRS) $(LIBS)
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c -o $@ $< $(INCDIRS)
