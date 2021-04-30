@@ -3,6 +3,7 @@
 
 #include <list>
 #include <Vec3.h>
+#include <Mat4.h>
 #include <Entity.h>
 #include <EntityType.h>
 
@@ -20,15 +21,26 @@ public:
 
     Entity* SpawnEntity(EntityType et);
 
+    void SetViewMatrix(Mat4* view) { viewMat = view; }
+    Mat4* GetViewMatrix() const { return viewMat; }
+
+    void SetProjectionMatrix(Mat4* proj) { projMat = proj; }
+    Mat4* GetProjectionMatrix() const { return projMat; } 
+    
+
 private:
 
     std::list<Entity*> entities;
 
-    static const int MAX_ENEMY_COUNT = 15;
+    //static const int MAX_ENEMY_COUNT = 15;
+    static const int MAX_ENEMY_COUNT = 1;
     static const int TREE_COUNT = 20;
 
     float lastSpawnTime;
     float currentTime;
+
+    Mat4* viewMat;
+    Mat4* projMat;
 
     void registerEntity(Entity* entity);
     void clearDeadEntities();

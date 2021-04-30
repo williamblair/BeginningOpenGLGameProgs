@@ -1,4 +1,5 @@
 #include <Ogro.h>
+#include <iostream>
 
 #define OGRO_MODEL "assets/models/Ogro/tris.md2"
 #define OGRO_TEXTURE "assets/models/Ogro/Ogrobase.tga"
@@ -57,6 +58,12 @@ void Ogro::OnPrepare(float dt)
     // pos.x += cosYaw * speed;
     // pos.z += sinYaw * speed;
     // SetPosition(pos);
+    
+    // debug test
+    yaw += 20.0f * dt;
+    if (yaw >= 360.0f) {
+        yaw -= 360.0f;
+    }
 }
 
 void Ogro::OnRender()
@@ -64,9 +71,13 @@ void Ogro::OnRender()
     Transform tf;
     shader.Bind();
     tf.position = GetPosition();
-    tf.rotation = angleAxis(deg2rad(GetYaw()), Vec3(0.0f, -1.0f, 0.0f));
+    tf.rotation = angleAxis(deg2rad(yaw), Vec3(0.0f, -1.0f, 0.0f));
     Mat4 modelMat = transformToMat4(tf);
+    Mat4* viewMat = gameWorld->GetViewMatrix();
+    Mat4* projMat = gameWorld->GetProjectionMatrix();
     shader.SetUniform("uModel", modelMat);
+    shader.SetUniform("uView", *viewMat);
+    shader.SetUniform("uProjection", *projMat);
     glBindTexture(GL_TEXTURE_2D, texID);
     shader.SetUniform("uTexture0", 0);
     model->Render(shader);

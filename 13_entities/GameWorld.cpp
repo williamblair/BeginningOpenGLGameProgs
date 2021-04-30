@@ -2,13 +2,19 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <cassert>
 #include <GameWorld.h>
 #include <Ogro.h>
+
+#define DBG_ASSERT(cond) assert(cond)
+//#define DBG_ASSERT(cond)
 
 GameWorld::GameWorld() :
     entities(std::list<Entity*>()),
     lastSpawnTime(0),
-    currentTime(0)
+    currentTime(0),
+    viewMat(nullptr),
+    projMat(nullptr)
 {
 
 }
@@ -59,12 +65,45 @@ bool GameWorld::Init()
 // TODO
 void GameWorld::Update(float dt)
 {
-    
+    currentTime += dt;
+
+    for (Entity* entity : entities)
+    {
+        entity->Prepare(dt);
+    }
+
+    // TODO - collision
+
+    clearDeadEntities();
+
+    // TODO - respawn enemy entities
+
+    // TODO - mouse/player movement input
 }
 
 // TODO
 void GameWorld::Render()
 {
+    DBG_ASSERT(viewMat != nullptr);
+    DBG_ASSERT(projMat != nullptr);
+
+    for (Entity* entity : entities)
+    {
+        Vec3 pos = entity->GetPosition();
+        // TODO - add collider null test
+        if (entity->GetType() == EntityType::LANDSCAPE)
+        {
+            entity->Render();
+            entity->PostRender();
+        }
+        // TODO - sphere in frustum test
+        //else if ()
+        else
+        {
+            entity->Render();
+            entity->PostRender();
+        }
+    }
 }
 
 Entity* GameWorld::SpawnEntity(EntityType et)
@@ -127,8 +166,10 @@ void GameWorld::clearDeadEntities()
 Vec3 GameWorld::getRandomPosition()
 {
     // TODO - base off of landscape size
-    float randX = rand() / (float(RAND_MAX) + 1);
-    float randZ = rand() / (float(RAND_MAX) + 1);
+    //float randX = rand() / (float(RAND_MAX) + 1);
+    //float randZ = rand() / (float(RAND_MAX) + 1);
+    float randX = 0.0f;
+    float randZ = -2.0f;
     float randY = 0.0f;
 
     return Vec3(randX, randY, randZ);

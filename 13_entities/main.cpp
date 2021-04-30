@@ -67,7 +67,7 @@ inline void PrintAnim(const std::string& name, FreetypeFont& f)
 int main(int argc, char *argv[])
 {
     Window          window;
-    Shader          ogroShader;
+    //Shader          ogroShader;
     FreetypeFont    font("assets/LiberationSans-Regular.ttf", 640, 480, 24);
     GameTimer       gameTimer;
     GameWorld       world;
@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
 
     srand(time(0));
 
-    ogroShader.Load("shaders/ogroVert.glsl", "shaders/ogroFrag.glsl");
-    ogroShader.Bind();
+    //ogroShader.Load("shaders/ogroVert.glsl", "shaders/ogroFrag.glsl");
+    //ogroShader.Bind();
     if (!font.Init()) {
         return 1;
     }
@@ -105,10 +105,15 @@ int main(int argc, char *argv[])
     shader.SetUniform("uView", viewMatrix); \
     shader.SetUniform("uProjection", projectionMatrix)
 
+    world.SetViewMatrix(&viewMatrix);
+    world.SetProjectionMatrix(&projectionMatrix);
+
     do
     {
         glClearColor(0.1, 0.2, 0.3, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        world.Render();
 
         PrintFPS(gameTimer, font);
 

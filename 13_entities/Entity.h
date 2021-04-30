@@ -2,6 +2,7 @@
 #define ENTITY_H_INCLUDED
 
 #include <Vec3.h>
+#include <EntityType.h>
 
 /* Forward declarations */
 class GameWorld;
@@ -29,6 +30,11 @@ public:
     virtual Vec3 GetPosition() const = 0;
     virtual void SetPosition(const Vec3& pos) = 0;
 
+    virtual EntityType GetType() const = 0;
+
+protected:
+    GameWorld* gameWorld;
+
 private:
 
     virtual void OnPrepare(float dt) = 0;
@@ -40,7 +46,6 @@ private:
 
     bool canBeRemoved;
 
-    GameWorld* gameWorld;
 };
 
 #endif // ENTITY_H_INCLUDED

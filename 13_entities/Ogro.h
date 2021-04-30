@@ -11,6 +11,7 @@
 #include <Shader.h>
 #include <Enemy.h>
 #include <EntityType.h>
+#include <GameWorld.h>
 
 class Ogro : public Enemy
 {

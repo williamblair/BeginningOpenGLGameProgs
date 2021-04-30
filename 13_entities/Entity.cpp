@@ -9,7 +9,9 @@ Entity::~Entity()
 {}
 
 void Entity::Prepare(float dt)
-{}
+{
+    OnPrepare(dt);
+}
 
 void Entity::Render()
 {
