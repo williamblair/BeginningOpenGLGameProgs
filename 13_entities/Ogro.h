@@ -32,6 +32,19 @@ public:
 
 private:
 
+    Md2Model* model;
+    Targa::Image texture;
+    GLuint texID;
+    static bool shaderLoaded;
+    static Shader shader;
+
+    AIState aiState;
+
+    float currentTime;
+    float lastAIChange;
+
+    void processAI();
+
     virtual void OnPrepare(float dt);
     virtual void OnRender();
     virtual void OnPostRender();
@@ -40,14 +53,10 @@ private:
     virtual void OnKill();
     virtual void OnResurrection();
 
-    Md2Model model;
-    Targa::Image texture;
-    GLuint texID;
-
-    AIState aiState;
-
-    float currentTime;
-    float lastAIChange;
+    inline float deg2rad(const float deg)
+    {
+        return deg * 3.1415926535 / 180.0f;
+    }
 };
 
 #endif // OGRO_H_INCLUDED

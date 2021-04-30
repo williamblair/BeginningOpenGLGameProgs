@@ -25,6 +25,9 @@ public:
     void SetYaw(float yaw) { this->yaw = yaw; }
     void SetPitch(float) {}
 
+    bool IsDead() const { return isDead; }
+    void Kill() { isDead = true; OnKill(); }
+
 protected:
     Vec3 position;
     Vec3 velocity;

@@ -4,3 +4,5 @@ opengl3
 *.dll
 *-config
 *.o
+*.swp
+

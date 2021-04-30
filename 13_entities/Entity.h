@@ -1,6 +1,8 @@
 #ifndef ENTITY_H_INCLUDED
 #define ENTITY_H_INCLUDED
 
+#include <Vec3.h>
+
 /* Forward declarations */
 class GameWorld;
 
