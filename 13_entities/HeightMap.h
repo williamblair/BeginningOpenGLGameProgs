@@ -9,16 +9,22 @@
 #include <cassert>
 #include <Vec2.h>
 #include <Vec3.h>
+#include <Transform.h>
 #include <Shader.h>
+#include <Entity.h>
+#include <TargaImage.h>
+#include <GameWorld.h>
 
 #define DBGASSERT(x) assert(x)
 //#define DBGASSERT(x)
 
-class HeightMap
+class HeightMap : public Entity
 {
 public:
-    HeightMap();
+    HeightMap(GameWorld* const gameWorld);
     virtual ~HeightMap();
+
+    virtual EntityType GetType() const { return EntityType::LANDSCAPE; }
 
     bool Load(const std::string& rawFileName,
               const unsigned int width = 65,
@@ -33,6 +39,9 @@ public:
         DBGASSERT((z * width) + x < (int)positions.size());
         return positions[(z * width) + x];
     }
+
+    Vec3 GetPosition() const { return transform.position; }
+    void SetPosition(const Vec3& pos) { transform.position = pos; }
 
 private:
 
@@ -58,6 +67,13 @@ private:
     GLuint waterIndexBuffer;
     GLuint waterTexCoordBuffer;
 
+    static bool shaderLoaded;
+    static Targa::Image grassTexture;
+    static GLuint grassTexID;
+    static Shader heightmapShader;
+
+    Transform transform;
+
     void GenerateVertices(const float sizeScale);
     void GenerateTexCoords();
     void GenerateNormals();
@@ -67,6 +83,13 @@ private:
     void GenerateWaterVertices();
     void GenerateWaterTexCoords();
     void GenerateWaterIndices();
+
+    virtual void OnPrepare(float dt);
+    virtual void OnRender();
+    virtual void OnPostRender();
+    virtual bool OnInitialize();
+    virtual void OnShutdown();
+    virtual void OnCollision(Entity* collider);
 };
 
 #endif // HEIGHT_MAP_H_INCLUDED

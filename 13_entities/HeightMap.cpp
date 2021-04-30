@@ -2,7 +2,18 @@
 #include <iostream>
 #include <HeightMap.h>
 
-HeightMap::HeightMap()
+#define HEIGHTMAP_GRASS_TEXTURE "assets/grass.tga"
+#define HEIGHTMAP_WATER_TEXTURE "assets/water.tga"
+#define HEIGHTMAP_VERTEX_SHADER "shaders/vertexShader.glsl"
+#define HEIGHTMAP_FRAGMENT_SHADER "shaders/fragmentShader.glsl"
+#define HEIGHTMAP_TEXTURE "assets/heightmap.raw"
+bool HeightMap::shaderLoaded;
+Targa::Image HeightMap::grassTexture;
+GLuint HeightMap::grassTexID;
+Shader HeightMap::heightmapShader;
+
+HeightMap::HeightMap(GameWorld* const gameWorld) :
+    Entity(gameWorld)
 {
     width = 0;
     vertexBuffer = 0;
@@ -14,6 +25,8 @@ HeightMap::HeightMap()
     waterVertexBuffer = 0;
     waterIndexBuffer = 0;
     waterTexCoordBuffer = 0;
+
+    shaderLoaded = false;
 }
 
 HeightMap::~HeightMap()
@@ -431,4 +444,64 @@ void HeightMap::DrawWater(Shader& shader)
     glDisable(GL_BLEND);
 }
 
+
+void HeightMap::OnPrepare(float dt)
+{
+}
+
+void HeightMap::OnRender()
+{
+    static Vec3 lightColor(1.0f,1.0f,1.0f);
+    static Vec3 lightPos(0.0f,18.0f,0.0f);
+    static Vec3 ambientColor(0.2f,0.2f,0.2f);
+    
+    heightmapShader.Bind();
+    Mat4 modelMat = transformToMat4(transform);
+    Mat4 normalMat = inverse(transposed(modelMat));
+    Mat4* viewMat = gameWorld->GetViewMatrix();
+    Mat4* projMat = gameWorld->GetProjectionMatrix();
+    heightmapShader.SetUniform("uModel", modelMat);
+    heightmapShader.SetUniform("uNormal", normalMat);
+    heightmapShader.SetUniform("uView", *viewMat);
+    heightmapShader.SetUniform("uProjection", *projMat);
+    heightmapShader.SetUniform("uLightColor", lightColor);
+    heightmapShader.SetUniform("uLightPos", lightPos);
+    heightmapShader.SetUniform("uAmbientColor", ambientColor);
+    heightmapShader.SetUniform("uTexture0", 0); // gl texture 0
+    glBindTexture(GL_TEXTURE_2D, grassTexID);
+    Draw(heightmapShader);
+    heightmapShader.UnBind();
+}
+
+void HeightMap::OnPostRender()
+{
+}
+
+bool HeightMap::OnInitialize()
+{
+    if (!shaderLoaded)
+    {
+        std::cout << "Heightmap Initialize" << std::endl;
+        heightmapShader.Load(HEIGHTMAP_VERTEX_SHADER, HEIGHTMAP_FRAGMENT_SHADER);
+        heightmapShader.Bind();
+        if (!Load(HEIGHTMAP_TEXTURE)) {
+            return false;
+        }
+        if (!grassTexture.Load(HEIGHTMAP_GRASS_TEXTURE)) {
+            return false;
+        }
+        grassTexID = Targa::Image::MakeTexture(grassTexture);
+        heightmapShader.UnBind();
+        shaderLoaded = true;
+    }
+    return true;
+}
+
+void HeightMap::OnShutdown()
+{
+}
+
+void HeightMap::OnCollision(Entity* collider)
+{
+}
 

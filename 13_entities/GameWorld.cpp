@@ -5,12 +5,14 @@
 #include <cassert>
 #include <GameWorld.h>
 #include <Ogro.h>
+#include <HeightMap.h>
 
 #define DBG_ASSERT(cond) assert(cond)
 //#define DBG_ASSERT(cond)
 
 GameWorld::GameWorld() :
     entities(std::list<Entity*>()),
+    heightMap(nullptr),
     lastSpawnTime(0),
     currentTime(0),
     viewMat(nullptr),
@@ -34,7 +36,9 @@ bool GameWorld::Init()
 {
     srand(time(0));
 
-    SpawnEntity(EntityType::LANDSCAPE);
+    heightMap = (HeightMap*)SpawnEntity(EntityType::LANDSCAPE);
+    Vec3 landscapePos(0.0f, -5.0f, 0.0f);
+    heightMap->SetPosition(landscapePos);
 
     for (int i = 0; i < MAX_ENEMY_COUNT; ++i)
     {
@@ -116,6 +120,11 @@ Entity* GameWorld::SpawnEntity(EntityType et)
         // For OGROs, we can use old ones
         // TODO
         newEntity = new Ogro(this);
+        lastSpawnTime = currentTime;
+
+        break;
+    case EntityType::LANDSCAPE:
+        newEntity = new HeightMap(this);
         lastSpawnTime = currentTime;
 
         break;

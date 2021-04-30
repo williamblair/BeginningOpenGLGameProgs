@@ -7,6 +7,9 @@
 #include <Entity.h>
 #include <EntityType.h>
 
+// forward declaration
+class HeightMap;
+
 class GameWorld
 {
 public:
@@ -31,6 +34,7 @@ public:
 private:
 
     std::list<Entity*> entities;
+    HeightMap* heightMap;
 
     //static const int MAX_ENEMY_COUNT = 15;
     static const int MAX_ENEMY_COUNT = 1;
