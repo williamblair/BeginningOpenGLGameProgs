@@ -43,6 +43,13 @@ public:
     Vec3 GetPosition() const { return transform.position; }
     void SetPosition(const Vec3& pos) { transform.position = pos; }
 
+    inline float GetMinX() const { return minX; }
+    inline float GetMinZ() const { return minZ; }
+    inline float GetMaxX() const { return maxX; }
+    inline float GetMaxZ() const { return maxZ; }
+
+    float GetHeightAt(const float x, const float z) const;
+
 private:
 
     std::vector<Vec3> positions;
@@ -52,6 +59,10 @@ private:
     std::vector<Vec2> texCoords;
     std::vector<uint32_t> indices;
     unsigned int width;
+    float minX;
+    float minZ;
+    float maxX;
+    float maxZ;
 
     std::vector<Vec3> waterPositions;
     std::vector<uint32_t> waterIndices;

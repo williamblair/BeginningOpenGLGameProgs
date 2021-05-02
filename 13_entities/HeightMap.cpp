@@ -16,6 +16,12 @@ HeightMap::HeightMap(GameWorld* const gameWorld) :
     Entity(gameWorld)
 {
     width = 0;
+
+    minX = 0.0f;
+    minZ = 0.0f;
+    maxX = 0.0f;
+    maxZ = 0.0f;
+
     vertexBuffer = 0;
     normalBuffer = 0;
     texCoordBuffer = 0;
@@ -105,6 +111,12 @@ void HeightMap::GenerateVertices(const float sizeScale)
             positions[i].x = x;
             positions[i].y = heights[i];
             positions[i].z = z;
+
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (z < minZ) minZ = z;
+            if (z > maxZ) maxZ = z;
+
             i++;
         }
     }
@@ -503,5 +515,43 @@ void HeightMap::OnShutdown()
 
 void HeightMap::OnCollision(Entity* collider)
 {
+}
+
+float HeightMap::GetHeightAt(const float x, const float z) const
+{
+    float halfWidth = float(width) * 0.5f;
+    float scaledX = x + halfWidth;
+    float scaledZ = z + halfWidth;
+
+    // round down to get nearest x and z position
+    int x0 = (int)floor(scaledX);
+    int z0 = (int)floor(scaledZ);
+
+    // get four nearest points
+    int p0 = z0 * width + x0;
+    int p1 = (z0 * width + x0) + 1;
+    int p2 = (z0 + 1) * width + x0;
+    int p3 = (z0 + 1) * width + x0 + 1;
+
+    float normX = scaledX - float(x0);
+    float normZ = scaledZ - float(z0);
+
+    // check against map boundries
+    if (p0 >= int(positions.size()) ||
+        p1 >= int(positions.size()) ||
+        p2 >= int(positions.size()) ||
+        p3 >= int(positions.size()) ||
+        p0 < 0 ||
+        p1 < 0 ||
+        p2 < 0 ||
+        p3 < 0)
+    {
+        return 0.0f;
+    }
+
+    // bilinear interpolate result heights
+    float xInterp0 = positions[p0].y + normX * (positions[p1].y - positions[p0].y);
+    float xInterp1 = positions[p2].y + normX * (positions[p3].y - positions[p2].y);
+    return xInterp0 + normZ * (xInterp1 - xInterp0);
 }
 

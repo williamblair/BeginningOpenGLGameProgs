@@ -6,6 +6,7 @@
 #include <GameWorld.h>
 #include <Ogro.h>
 #include <HeightMap.h>
+#include <Tree.h>
 
 #define DBG_ASSERT(cond) assert(cond)
 //#define DBG_ASSERT(cond)
@@ -43,10 +44,13 @@ bool GameWorld::Init()
     for (int i = 0; i < MAX_ENEMY_COUNT; ++i)
     {
         Entity* newEntity = SpawnEntity(EntityType::OGRO);
-        newEntity->SetPosition(getRandomPosition());
+        //newEntity->SetPosition(getRandomPosition());
+        Vec3 pos(1.0f, 0.0f, -2.0f);
+        pos = getRandomPosition();
+        pos.y -= 5.0f; // to account for terrain shift down by 5 above
+        newEntity->SetPosition(pos);
     }
 
-    // TODO
     for (int i = 0; i < TREE_COUNT; ++i)
     {
         Entity* newEntity = SpawnEntity(EntityType::TREE);
@@ -56,6 +60,7 @@ bool GameWorld::Init()
         {
             pos = getRandomPosition();
         }
+        pos.y -= 5.0f; // to account for terrain shift down by 5 above
         newEntity->SetPosition(pos);
     }
 
@@ -66,7 +71,6 @@ bool GameWorld::Init()
     return true;
 }
 
-// TODO
 void GameWorld::Update(float dt)
 {
     currentTime += dt;
@@ -85,7 +89,6 @@ void GameWorld::Update(float dt)
     // TODO - mouse/player movement input
 }
 
-// TODO
 void GameWorld::Render()
 {
     DBG_ASSERT(viewMat != nullptr);
@@ -127,6 +130,10 @@ Entity* GameWorld::SpawnEntity(EntityType et)
         newEntity = new HeightMap(this);
         lastSpawnTime = currentTime;
 
+        break;
+    case EntityType::TREE:
+        newEntity = new Tree(this);
+        lastSpawnTime = currentTime;
         break;
     default:
         std::cout << __func__ << ": unhandled entity type: "
@@ -177,9 +184,13 @@ Vec3 GameWorld::getRandomPosition()
     // TODO - base off of landscape size
     //float randX = rand() / (float(RAND_MAX) + 1);
     //float randZ = rand() / (float(RAND_MAX) + 1);
-    float randX = 0.0f;
-    float randZ = -2.0f;
-    float randY = 0.0f;
+    //float randX = 0.0f;
+    //float randZ = -2.0f;
+    //float randY = 0.0f;
+    float randX = heightMap->GetMinX() + (rand() % int(heightMap->GetMaxX() - heightMap->GetMinX()));
+    float randZ = heightMap->GetMinZ() + (rand() % int(heightMap->GetMaxZ() - heightMap->GetMinZ()));
+    float randY = heightMap->GetHeightAt(randX, randZ);
 
+    std::cout << "rand x, y, z: " << randX << ", " << randY << ", " << randZ << std::endl;
     return Vec3(randX, randY, randZ);
 }

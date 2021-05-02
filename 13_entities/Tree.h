@@ -8,11 +8,17 @@
 #include <GL/glew.h>
 
 #include <Mat4.h>
+#include <Vec3.h>
 #include <Transform.h>
 #include <Shader.h>
 #include <TargaImage.h>
+#include <Entity.h>
+#include <EntityType.h>
 
-class Tree
+// forward declarations
+class GameWorld;
+
+class Tree : public Entity
 {
 public:
 
@@ -20,41 +26,54 @@ public:
     // shader need to be set
     static Shader shader;
 
-    Tree() :
-        x(0.0f),
-        y(0.0f),
-        z(0.0f)
+    Tree(GameWorld* world) :
+        Entity(world)
     {}
 
-    Tree(float x, float y, float z) :
-        x(x),
-        y(y),
-        z(z)
-    {}
-    Tree(const Tree& t) :
-        x(t.x),
-        y(t.y),
-        z(t.z)
-    {}
+    Tree(GameWorld* world,
+         float x, float y, float z) :
+        Entity(world)
+    {
+        transform.position = Vec3(x,y,z);
+    }
+    Tree(GameWorld* world,
+         const Tree& t) :
+        Entity(world)
+    {
+        transform = t.transform;
+    }
 
     Tree& operator=(const Tree& t)
     {
-        x = t.x;
-        y = t.y;
-        z = t.z;
-
+        transform = t.transform;
         return *this;
     }
+
+    EntityType GetType() const { return EntityType::TREE; }
 
     static bool Init();
     
     void Draw();
 
-private:
+    virtual void OnPrepare(float dt);
+    virtual void OnRender();
+    virtual void OnPostRender();
+    virtual bool OnInitialize();
+    virtual void OnShutdown();
 
-    float x;
-    float y;
-    float z;
+    // TODO
+    virtual void OnCollision(Entity* collder) {}
+
+    void SetPosition(const Vec3& v) { transform.position = v; }
+    Vec3 GetPosition() const { return transform.position; }
+
+    float GetYaw() const { return 0.0f; }
+    float GetPitch() const { return 0.0f; }
+
+    void SetYaw(const float val)   { (void)val; }
+    void SetPitch(const float val) { (void)val; }
+
+private:
 
     static GLuint texID;
 

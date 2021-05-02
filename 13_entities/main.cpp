@@ -99,7 +99,9 @@ int main(int argc, char *argv[])
                                         1.0,            // near clip
                                         1000.0);         // far clip
 
-    Mat4 viewMatrix; // = identity matrix
+    Mat4 viewMatrix = lookAt(Vec3(0.0f, 3.0f, -30.0f), // eye pos
+                             Vec3(0.0f, 0.0f, 0.0f),    // eye target
+                             Vec3(0.0f, 1.0f, 0.0f));   // up
 
 #define UpdateUniforms(shader)              \
     shader.SetUniform("uView", viewMatrix); \

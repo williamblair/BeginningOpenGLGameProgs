@@ -1,4 +1,6 @@
 #include <Tree.h>
+#include <GameWorld.h>
+#include <iostream>
 
 Shader Tree::shader;
 GLuint Tree::texID = 0;
@@ -44,15 +46,17 @@ bool Tree::Init()
 
 void Tree::Draw()
 {
-    transform.position.x = x;
-    transform.position.y = y;
-    transform.position.z = z;
     modelMat = transformToMat4(transform);
 
     shader.Bind();
+    Mat4* viewMat = gameWorld->GetViewMatrix();
+    Mat4* projMat = gameWorld->GetProjectionMatrix();
     GLuint aPosition = shader.GetAttribute("aPosition");
     GLuint aTexCoord0 = shader.GetAttribute("aTexCoord0");
     shader.SetUniform("uModel", modelMat);
+    shader.SetUniform("uView", *viewMat);
+    shader.SetUniform("uProjection", *projMat);
+    shader.SetUniform("uTexture0", 0); // GL texture 0
 
     glBindTexture(GL_TEXTURE_2D, texID);
 
@@ -127,4 +131,20 @@ void Tree::InitBuffers()
                  (void*)texCoords,
                  GL_STATIC_DRAW);
 }
+
+void Tree::OnPrepare(float dt)
+{}
+void Tree::OnRender()
+{
+    Draw();
+}
+
+void Tree::OnPostRender()
+{}
+bool Tree::OnInitialize()
+{
+    return Init();
+}
+void Tree::OnShutdown()
+{}
 

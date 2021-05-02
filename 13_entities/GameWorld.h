@@ -36,9 +36,8 @@ private:
     std::list<Entity*> entities;
     HeightMap* heightMap;
 
-    //static const int MAX_ENEMY_COUNT = 15;
-    static const int MAX_ENEMY_COUNT = 1;
-    static const int TREE_COUNT = 20;
+    static const int MAX_ENEMY_COUNT = 30;
+    static const int TREE_COUNT = 30;
 
     float lastSpawnTime;
     float currentTime;
