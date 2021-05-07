@@ -99,15 +99,15 @@ int main(int argc, char *argv[])
                                         1.0,            // near clip
                                         1000.0);         // far clip
 
-    Mat4 viewMatrix = lookAt(Vec3(0.0f, 5.0f, -30.0f), // eye pos
-                             Vec3(0.0f, 0.0f, 0.0f),    // eye target
-                             Vec3(0.0f, 1.0f, 0.0f));   // up
+    //Mat4 viewMatrix = lookAt(Vec3(0.0f, 5.0f, -30.0f), // eye pos
+    //                         Vec3(0.0f, 0.0f, 0.0f),    // eye target
+    //                         Vec3(0.0f, 1.0f, 0.0f));   // up
 
-#define UpdateUniforms(shader)              \
-    shader.SetUniform("uView", viewMatrix); \
-    shader.SetUniform("uProjection", projectionMatrix)
+//#define UpdateUniforms(shader)              \
+//    shader.SetUniform("uView", viewMatrix); \
+//    shader.SetUniform("uProjection", projectionMatrix)
 
-    world.SetViewMatrix(&viewMatrix);
+    //world.SetViewMatrix(&viewMatrix);
     world.SetProjectionMatrix(&projectionMatrix);
 
     do
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 
     } while (!window.ShouldQuit());
 
-#undef UpdateUniforms
+//#undef UpdateUniforms
 
     return 0;
 }

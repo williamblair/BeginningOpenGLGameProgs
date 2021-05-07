@@ -479,8 +479,8 @@ void HeightMap::OnRender()
     heightmapShader.Bind();
     Mat4 modelMat = transformToMat4(transform);
     Mat4 normalMat = inverse(transposed(modelMat));
-    Mat4* viewMat = gameWorld->GetViewMatrix();
-    Mat4* projMat = gameWorld->GetProjectionMatrix();
+    Mat4* viewMat = GetWorld()->GetViewMatrix();
+    Mat4* projMat = GetWorld()->GetProjectionMatrix();
     heightmapShader.SetUniform("uModel", modelMat);
     heightmapShader.SetUniform("uNormal", normalMat);
     heightmapShader.SetUniform("uView", *viewMat);

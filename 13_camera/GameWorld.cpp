@@ -15,9 +15,9 @@ GameWorld::GameWorld() :
     entities(std::list<Entity*>()),
     colliders(std::list<Collider*>()),
     heightMap(nullptr),
+    camera(nullptr),
     lastSpawnTime(0),
     currentTime(0),
-    viewMat(nullptr),
     projMat(nullptr)
 {
 }
@@ -29,6 +29,12 @@ GameWorld::~GameWorld()
         delete entity;
         entity = nullptr;
     }
+    
+    if (camera != nullptr)
+    {
+        delete camera;
+        camera = nullptr;
+    }
 
     entities.clear();
     colliders.clear();
@@ -37,6 +43,12 @@ GameWorld::~GameWorld()
 bool GameWorld::Init()
 {
     srand(time(0));
+
+    camera = new Camera();
+    if (camera == nullptr) {
+        std::cout << __func__ << ": Failed to allocate camera" << std::endl;
+        return false;
+    }
 
     heightMap = (HeightMap*)SpawnEntity(EntityType::LANDSCAPE);
     //Vec3 landscapePos(0.0f, -5.0f, 0.0f);
@@ -92,7 +104,8 @@ void GameWorld::Update(float dt)
 
 void GameWorld::Render()
 {
-    DBG_ASSERT(viewMat != nullptr);
+    //DBG_ASSERT(viewMat != nullptr);
+    DBG_ASSERT(GetViewMatrix() != nullptr);
     DBG_ASSERT(projMat != nullptr);
 
     for (Entity* entity : entities)
@@ -156,6 +169,14 @@ Entity* GameWorld::SpawnEntity(EntityType et)
     registerEntity(newEntity);
 
     return newEntity;
+}
+
+Mat4* GameWorld::GetViewMatrix()
+{
+    DBG_ASSERT(camera != nullptr);
+    Mat4* viewMat = camera->GetViewMatrix();
+    DBG_ASSERT(viewMat != nullptr);
+    return viewMat;
 }
 
 void GameWorld::registerEntity(Entity* entity)

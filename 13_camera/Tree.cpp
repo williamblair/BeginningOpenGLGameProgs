@@ -49,8 +49,8 @@ void Tree::Draw()
     modelMat = transformToMat4(transform);
 
     shader.Bind();
-    Mat4* viewMat = gameWorld->GetViewMatrix();
-    Mat4* projMat = gameWorld->GetProjectionMatrix();
+    Mat4* viewMat = GetWorld()->GetViewMatrix();
+    Mat4* projMat = GetWorld()->GetProjectionMatrix();
     GLuint aPosition = shader.GetAttribute("aPosition");
     GLuint aTexCoord0 = shader.GetAttribute("aTexCoord0");
     shader.SetUniform("uModel", modelMat);

@@ -67,8 +67,8 @@ void Ogro::OnRender()
     tf.position = GetPosition();
     tf.rotation = angleAxis(deg2rad(yaw), Vec3(0.0f, -1.0f, 0.0f));
     Mat4 modelMat = transformToMat4(tf);
-    Mat4* viewMat = gameWorld->GetViewMatrix();
-    Mat4* projMat = gameWorld->GetProjectionMatrix();
+    Mat4* viewMat = GetWorld()->GetViewMatrix();
+    Mat4* projMat = GetWorld()->GetProjectionMatrix();
     shader.SetUniform("uModel", modelMat);
     shader.SetUniform("uView", *viewMat);
     shader.SetUniform("uProjection", *projMat);
