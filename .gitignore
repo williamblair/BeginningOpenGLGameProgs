@@ -5,4 +5,6 @@ opengl3
 *-config
 *.o
 *.swp
-
+.codelite
+*.project
+*.workspace
