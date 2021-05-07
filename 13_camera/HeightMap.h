@@ -43,6 +43,11 @@ public:
 
     Vec3 GetPosition() const { return transform.position; }
     void SetPosition(const Vec3& pos) { transform.position = pos; }
+    
+    float GetYaw() const { return 0.0f; }
+    float GetPitch() const { return 0.0f; }
+    void SetYaw(const float) {}
+    void SetPitch(const float) {}
 
     inline float GetMinX() const { return minX; }
     inline float GetMinZ() const { return minZ; }

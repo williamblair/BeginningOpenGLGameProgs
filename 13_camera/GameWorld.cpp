@@ -44,23 +44,21 @@ bool GameWorld::Init()
 {
     srand(time(0));
 
+    Vec3 cameraPos(0.0f, 10.0f, 0.0f);
     camera = new Camera();
     if (camera == nullptr) {
         std::cout << __func__ << ": Failed to allocate camera" << std::endl;
         return false;
     }
+    camera->SetPosition(cameraPos);
 
     heightMap = (HeightMap*)SpawnEntity(EntityType::LANDSCAPE);
-    //Vec3 landscapePos(0.0f, -5.0f, 0.0f);
-    //heightMap->SetPosition(landscapePos);
 
     for (int i = 0; i < MAX_ENEMY_COUNT; ++i)
     {
         Entity* newEntity = SpawnEntity(EntityType::OGRO);
-        //newEntity->SetPosition(getRandomPosition());
         Vec3 pos(1.0f, 0.0f, -2.0f);
         pos = getRandomPosition();
-        //pos.y -= 5.0f; // to account for terrain shift down by 5 above
         newEntity->SetPosition(pos);
     }
 
@@ -74,7 +72,6 @@ bool GameWorld::Init()
         {
             pos = getRandomPosition();
         }
-        //pos.y -= 5.0f; // to account for terrain shift down by 5 above
         newEntity->SetPosition(pos);
     }
 
@@ -169,14 +166,6 @@ Entity* GameWorld::SpawnEntity(EntityType et)
     registerEntity(newEntity);
 
     return newEntity;
-}
-
-Mat4* GameWorld::GetViewMatrix()
-{
-    DBG_ASSERT(camera != nullptr);
-    Mat4* viewMat = camera->GetViewMatrix();
-    DBG_ASSERT(viewMat != nullptr);
-    return viewMat;
 }
 
 void GameWorld::registerEntity(Entity* entity)

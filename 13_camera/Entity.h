@@ -30,6 +30,11 @@ public:
 
     virtual Vec3 GetPosition() const = 0;
     virtual void SetPosition(const Vec3& pos) = 0;
+    
+    virtual void SetYaw(const float yaw) = 0;
+    virtual void SetPitch(const float pitch) = 0;
+    virtual float GetYaw() const = 0;
+    virtual float GetPitch() const = 0;
 
     virtual EntityType GetType() const = 0;
 

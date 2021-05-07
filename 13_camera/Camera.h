@@ -14,6 +14,14 @@ public:
     Camera(Vec3& position);
     ~Camera();
     
+    void SetPosition(Vec3& position) { 
+        this->position = position; 
+        UpdateMatrix();
+    }
+    
+    void AddYaw(const float degrees);
+    void AddPitch(const float degrees);
+    
     Mat4* GetViewMatrix() { return &viewMatrix; }
 
 private:
@@ -23,10 +31,17 @@ private:
     Vec3 forward;
     Vec3 up;
     
+    float yaw;
+    float pitch;
+    
     Mat4 viewMatrix;
     
     Entity* attachedEntity;
     
+    inline float deg2rad(const float deg)
+    {
+        return deg * 3.1415926535f / 180.0f;
+    }
     void UpdateMatrix();
 };
 

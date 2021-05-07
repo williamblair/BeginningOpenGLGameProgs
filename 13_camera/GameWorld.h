@@ -25,10 +25,7 @@ public:
 
     Entity* SpawnEntity(EntityType et);
 
-    //void SetViewMatrix(Mat4* view) { viewMat = view; }
-    //Mat4* GetViewMatrix() const { return viewMat; }
-    //Mat4* GetViewMatrix() { return camera->GetViewMatrix(); }
-    Mat4* GetViewMatrix();
+    Mat4* GetViewMatrix() { return camera->GetViewMatrix(); }
 
     void SetProjectionMatrix(Mat4* proj) { projMat = proj; }
     Mat4* GetProjectionMatrix() const { return projMat; } 
