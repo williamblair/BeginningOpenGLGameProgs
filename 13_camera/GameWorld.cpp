@@ -19,7 +19,11 @@ GameWorld::GameWorld() :
     mouseInterface(nullptr),
     lastSpawnTime(0),
     currentTime(0),
-    projMat(nullptr)
+    projMat(nullptr),
+    mouseRelX(0.0f),
+    mouseRelY(0.0f),
+    screenWidth(0.0f),
+    screenHeight(0.0f)
 {
 }
 
@@ -97,7 +101,40 @@ void GameWorld::Update(float dt)
 
     // TODO - respawn enemy entities
 
-    // TODO - mouse/player movement input
+    // Last mouse positions stored int list;
+    // Each frame new relative position added and oldest is removed
+    // weighted mouse position is then calcuated; newest position has most weight
+    // then averaged to produce new relative mouse pos.
+    static std::list<std::pair<float, float>> mousePosHistory;
+    
+    int x, y;
+    mouseInterface->GetMousePos(x, y);
+    mouseInterface->ShowCursor(false); // TODO - this doesn't do anything
+    
+    // Add current mouse position - starting position (so pos is relative)
+    mousePosHistory.push_front(std::make_pair(float(x) - (screenWidth / 2),
+                                              float(y) - (screenHeight / 2)));
+    if (mousePosHistory.size() > 10) {
+        mousePosHistory.pop_back();
+    }
+    
+    mouseRelX = 0.0f;
+    mouseRelY = 0.0f;
+    float weight = 1.0f;
+    
+    // calculate weighted average
+    for (auto& m : mousePosHistory)
+    {
+        mouseRelX += m.first * weight;
+        mouseRelY += m.second * weight;
+        
+        weight *= 0.5f;
+    }
+    mouseRelX /= 10.0f;
+    mouseRelY /= 10.0f;
+    
+    // put mouse in middle of screen
+    mouseInterface->SetMousePos(int(screenWidth / 2), int(screenHeight / 2)); // TODO - doesn't do anything
 }
 
 void GameWorld::Render()

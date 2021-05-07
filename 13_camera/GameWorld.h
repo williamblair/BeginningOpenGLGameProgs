@@ -40,6 +40,13 @@ public:
 
     HeightMap* GetHeightMap() { return heightMap; }
     
+    void SetScreenWidth(const float width) { screenWidth = width; }
+    void SetScreenHeight(const float height) { screenHeight = height; }
+    
+    void GetRelativeMousePos(float& x, float& y) {
+        x = mouseRelX;
+        y = mouseRelY;
+    }
 
 private:
 
@@ -56,6 +63,11 @@ private:
     float currentTime;
     
     Mat4* projMat;
+    
+    float mouseRelX;
+    float mouseRelY;
+    float screenWidth;
+    float screenHeight;
 
     void registerEntity(Entity* entity);
     void registerCollider(Collider* collider);

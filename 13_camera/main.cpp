@@ -48,6 +48,8 @@ const Md2Model::Animation* g_Animations[20] =
 int g_NumAnims = 20;
 int g_AnimIndex = 0;
 
+#define S_WIDTH 640
+#define S_HEIGHT 480
 
 inline void PrintFPS(GameTimer& t, FreetypeFont& f)
 {
@@ -69,11 +71,11 @@ int main(int argc, char *argv[])
 {
     Window          window;
     MouseInterface  mouseInterface;
-    FreetypeFont    font("assets/LiberationSans-Regular.ttf", 640, 480, 24);
+    FreetypeFont    font("assets/LiberationSans-Regular.ttf", S_WIDTH, S_HEIGHT, 24);
     GameTimer       gameTimer;
     GameWorld       world;
 
-    if (!window.Init("Hello World", 640, 480, &mouseInterface)) {
+    if (!window.Init("Hello World", S_WIDTH, S_HEIGHT, &mouseInterface)) {
         return 1;
     }
     GLuint gVAO = 0;
@@ -96,12 +98,14 @@ int main(int argc, char *argv[])
     mouseInterface.SetWindow(&window);
 
     Mat4 projectionMatrix = perspective(52.0f,          // fov
-                                        640.0/480.0,    // aspect
+                                        float(S_WIDTH)/float(S_HEIGHT),    // aspect
                                         1.0,            // near clip
                                         1000.0);         // far clip
 
     world.SetProjectionMatrix(&projectionMatrix);
     world.SetMouseInterface(&mouseInterface);
+    world.SetScreenWidth(float(S_WIDTH));
+    world.SetScreenHeight(float(S_HEIGHT));
 
     do
     {
