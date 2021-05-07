@@ -23,7 +23,9 @@ GameWorld::GameWorld() :
     mouseRelX(0.0f),
     mouseRelY(0.0f),
     screenWidth(0.0f),
-    screenHeight(0.0f)
+    screenHeight(0.0f),
+    lastMouseX(0.0f),
+    lastMouseY(0.0f)
 {
 }
 
@@ -49,7 +51,7 @@ bool GameWorld::Init()
 {
     srand(time(0));
 
-    Vec3 cameraPos(0.0f, 10.0f, 0.0f);
+    Vec3 cameraPos(0.0f, 8.0f, 0.0f);
     camera = new Camera();
     if (camera == nullptr) {
         std::cout << __func__ << ": Failed to allocate camera" << std::endl;
@@ -101,40 +103,7 @@ void GameWorld::Update(float dt)
 
     // TODO - respawn enemy entities
 
-    // Last mouse positions stored int list;
-    // Each frame new relative position added and oldest is removed
-    // weighted mouse position is then calcuated; newest position has most weight
-    // then averaged to produce new relative mouse pos.
-    static std::list<std::pair<float, float>> mousePosHistory;
-    
-    int x, y;
-    mouseInterface->GetMousePos(x, y);
-    mouseInterface->ShowCursor(false); // TODO - this doesn't do anything
-    
-    // Add current mouse position - starting position (so pos is relative)
-    mousePosHistory.push_front(std::make_pair(float(x) - (screenWidth / 2),
-                                              float(y) - (screenHeight / 2)));
-    if (mousePosHistory.size() > 10) {
-        mousePosHistory.pop_back();
-    }
-    
-    mouseRelX = 0.0f;
-    mouseRelY = 0.0f;
-    float weight = 1.0f;
-    
-    // calculate weighted average
-    for (auto& m : mousePosHistory)
-    {
-        mouseRelX += m.first * weight;
-        mouseRelY += m.second * weight;
-        
-        weight *= 0.5f;
-    }
-    mouseRelX /= 10.0f;
-    mouseRelY /= 10.0f;
-    
-    // put mouse in middle of screen
-    mouseInterface->SetMousePos(int(screenWidth / 2), int(screenHeight / 2)); // TODO - doesn't do anything
+    updateRelMousePos(dt);
 }
 
 void GameWorld::Render()
@@ -257,4 +226,68 @@ Vec3 GameWorld::getRandomPosition()
     float randY = heightMap->GetHeightAt(randX, randZ);
 
     return Vec3(randX, randY, randZ);
+}
+
+void GameWorld::updateRelMousePos(const float dt)
+{
+    // TODO - below seems buggy/unresponsive when the mouse isn't moving
+#if 0
+    // Last mouse positions stored int list;
+    // Each frame new relative position added and oldest is removed
+    // weighted mouse position is then calcuated; newest position has most weight
+    // then averaged to produce new relative mouse pos.
+    static std::list<std::pair<float, float>> mousePosHistory;
+    
+    int x, y;
+    mouseInterface->GetMousePos(x, y);
+    mouseInterface->ShowCursor(false); // TODO - this doesn't do anything
+    
+    // Add current mouse position - starting position (so pos is relative)
+    mousePosHistory.push_front(std::make_pair(float(x) - (screenWidth / 2),
+                                              float(y) - (screenHeight / 2)));
+    if (mousePosHistory.size() > 10) {
+        mousePosHistory.pop_back();
+    }
+    
+    mouseRelX = 0.0f;
+    mouseRelY = 0.0f;
+    float weight = 1.0f;
+    
+    // calculate weighted average
+    for (auto& m : mousePosHistory)
+    {
+        mouseRelX += m.first * weight * dt;
+        mouseRelY += m.second * weight * dt;
+        
+        weight *= 0.5f;
+    }
+    mouseRelX /= float(mousePosHistory.size());
+    mouseRelY /= float(mousePosHistory.size());
+    
+    // put mouse in middle of screen
+    mouseInterface->SetMousePos(int(screenWidth / 2), int(screenHeight / 2)); // TODO - doesn't do anything
+#endif
+    
+#if 1
+    // mouse movement based on previous mouse position
+    int curMouseX, curMouseY;
+    mouseInterface->GetMousePos(curMouseX, curMouseY);
+    
+    float diffMouseX = curMouseX - lastMouseX;
+    float diffMouseY = curMouseY - lastMouseY;
+    
+    mouseRelX = diffMouseX;
+    mouseRelY = diffMouseY;
+    
+    lastMouseX = curMouseX;
+    lastMouseY = curMouseY;
+#endif
+    
+    // TODO - this will be done inside player class
+    {
+        float x, y;
+        GetRelativeMousePos(x, y);
+        camera->AddYaw(x * 40.0f * dt);
+        camera->AddPitch(y * -40.0f * dt);
+    }
 }

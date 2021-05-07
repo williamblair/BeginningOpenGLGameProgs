@@ -40,7 +40,7 @@ void Camera::AddYaw(const float degrees)
     {
         yaw -= 360.0f;
     }
-    if (yaw < 0.0f)
+    else if (yaw < 0.0f)
     {
         yaw += 360.0f;
     }
@@ -54,6 +54,8 @@ void Camera::AddYaw(const float degrees)
     
     forward.x = -sinYaw * len(forward);
     forward.z = cosYaw * len(forward);
+    
+    UpdateMatrix();
 }
 
 void Camera::AddPitch(const float degrees)

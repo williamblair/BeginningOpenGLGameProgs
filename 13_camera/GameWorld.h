@@ -40,8 +40,16 @@ public:
 
     HeightMap* GetHeightMap() { return heightMap; }
     
-    void SetScreenWidth(const float width) { screenWidth = width; }
-    void SetScreenHeight(const float height) { screenHeight = height; }
+    void SetScreenWidth(const float width) { 
+        screenWidth = width; 
+        mouseInterface->SetScreenWidth(width);
+        lastMouseX = width / 2.0f;
+    }
+    void SetScreenHeight(const float height) { 
+        screenHeight = height; 
+        mouseInterface->SetScreenHeight(height);
+        lastMouseY = height / 2.0f;
+    }
     
     void GetRelativeMousePos(float& x, float& y) {
         x = mouseRelX;
@@ -68,12 +76,15 @@ private:
     float mouseRelY;
     float screenWidth;
     float screenHeight;
+    float lastMouseX;
+    float lastMouseY;
 
     void registerEntity(Entity* entity);
     void registerCollider(Collider* collider);
     void unregisterCollider(Collider* collider);
     void clearDeadEntities();
     Vec3 getRandomPosition();
+    void updateRelMousePos(const float dt);
 };
 
 #endif // GAME_WORLD_H_INCLUDED

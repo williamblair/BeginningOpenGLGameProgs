@@ -48,6 +48,7 @@ const Md2Model::Animation* g_Animations[20] =
 int g_NumAnims = 20;
 int g_AnimIndex = 0;
 
+// screen size
 #define S_WIDTH 640
 #define S_HEIGHT 480
 
