@@ -14,6 +14,7 @@
 #include <Ogro.h>
 #include <Explosion.h>
 #include <GameWorld.h>
+#include <MouseInterface.h>
 
 #ifdef __WIN32
 #undef main
@@ -67,11 +68,12 @@ inline void PrintAnim(const std::string& name, FreetypeFont& f)
 int main(int argc, char *argv[])
 {
     Window          window;
+    MouseInterface  mouseInterface;
     FreetypeFont    font("assets/LiberationSans-Regular.ttf", 640, 480, 24);
     GameTimer       gameTimer;
     GameWorld       world;
 
-    if (!window.Initialize("Hello World", 640, 480)) {
+    if (!window.Init("Hello World", 640, 480, &mouseInterface)) {
         return 1;
     }
     GLuint gVAO = 0;
@@ -91,12 +93,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    mouseInterface.SetWindow(&window);
+
     Mat4 projectionMatrix = perspective(52.0f,          // fov
                                         640.0/480.0,    // aspect
                                         1.0,            // near clip
                                         1000.0);         // far clip
 
     world.SetProjectionMatrix(&projectionMatrix);
+    world.SetMouseInterface(&mouseInterface);
 
     do
     {

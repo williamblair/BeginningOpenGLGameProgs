@@ -7,6 +7,7 @@
 #include <Entity.h>
 #include <EntityType.h>
 #include <Camera.h>
+#include <MouseInterface.h>
 
 // forward declaration
 class HeightMap;
@@ -29,6 +30,13 @@ public:
 
     void SetProjectionMatrix(Mat4* proj) { projMat = proj; }
     Mat4* GetProjectionMatrix() const { return projMat; } 
+    
+    void SetMouseInterface(MouseInterface* mouseInterface) {
+        this->mouseInterface = mouseInterface;
+    }
+    MouseInterface* GetMouseInterface() {
+        return mouseInterface;
+    }
 
     HeightMap* GetHeightMap() { return heightMap; }
     
@@ -39,13 +47,13 @@ private:
     std::list<Collider*> colliders;
     HeightMap* heightMap;
     Camera* camera;
+    MouseInterface* mouseInterface;
 
     static const int MAX_ENEMY_COUNT = 60;
     static const int TREE_COUNT = 30;
 
     float lastSpawnTime;
     float currentTime;
-
     
     Mat4* projMat;
 

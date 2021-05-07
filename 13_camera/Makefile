@@ -18,7 +18,8 @@ OBJS=main.o             \
      Collider.o         \
      SphereCollider.o   \
      TerrainCollider.o  \
-     Camera.o
+     Camera.o			\
+     MouseInterface.o
 TARGET=main
 
 all: $(OBJS)

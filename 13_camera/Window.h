@@ -7,12 +7,15 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
+#include <MouseInterface.h>
+
 class Window
 {
 public:
 
     inline Window() :
         window(nullptr),
+        mouseInterface(nullptr),
         quit(false),
         spaceKeyReleased(false)
     {
@@ -20,7 +23,10 @@ public:
     inline virtual ~Window() {
         Shutdown();
     }
-    inline virtual bool Initialize(const char* title, const int width, const int height) {
+    inline virtual bool Init(const char* title, const int width, const int height, MouseInterface* mouseInterface) {
+        
+        this->mouseInterface = mouseInterface;
+        
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             std::cerr << __func__ << ": failed to init SDL: " << SDL_GetError() << std::endl;
             return false;
@@ -67,6 +73,33 @@ public:
                     spaceKeyReleased = true;
                 }
             }
+            else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                switch (e.button.button)
+                {
+                case SDL_BUTTON_LEFT:
+                    mouseInterface->SetButtonPressed(0, true);
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    mouseInterface->SetButtonPressed(1, true);
+                    break;
+                }
+            }
+            else if (e.type == SDL_MOUSEBUTTONUP) {
+                switch (e.button.button)
+                {
+                case SDL_BUTTON_LEFT:
+                    mouseInterface->SetButtonPressed(0, false);
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    mouseInterface->SetButtonPressed(1, false);
+                    break;
+                }
+            }
+            else if (e.type == SDL_MOUSEMOTION) {
+                int mouseX = e.motion.x;
+                int mouseY = e.motion.y;
+                mouseInterface->SetMousePos(mouseX, mouseY);
+            }
         }
 
         SDL_GL_SwapWindow(window);
@@ -94,6 +127,7 @@ private:
 
     SDL_Window* window;
     SDL_GLContext gc;
+    MouseInterface* mouseInterface;
     bool quit;
     bool spaceKeyReleased;
 };

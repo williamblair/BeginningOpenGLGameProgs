@@ -16,6 +16,7 @@ GameWorld::GameWorld() :
     colliders(std::list<Collider*>()),
     heightMap(nullptr),
     camera(nullptr),
+    mouseInterface(nullptr),
     lastSpawnTime(0),
     currentTime(0),
     projMat(nullptr)
