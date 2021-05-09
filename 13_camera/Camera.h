@@ -21,6 +21,7 @@ public:
     
     void AddYaw(const float degrees);
     void AddPitch(const float degrees);
+    void MoveForward(const float speed);
     
     Mat4* GetViewMatrix() { return &viewMatrix; }
 

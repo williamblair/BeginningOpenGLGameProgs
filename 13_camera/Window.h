@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <map>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
 #include <MouseInterface.h>
+#include <KeyboardInterface.h>
 
 class Window
 {
@@ -16,6 +18,7 @@ public:
     inline Window() :
         window(nullptr),
         mouseInterface(nullptr),
+        keyboardInterface(nullptr),
         quit(false),
         spaceKeyReleased(false)
     {
@@ -23,9 +26,14 @@ public:
     inline virtual ~Window() {
         Shutdown();
     }
-    inline virtual bool Init(const char* title, const int width, const int height, MouseInterface* mouseInterface) {
+    inline virtual bool Init(const char* title,
+                             const int width, 
+                             const int height, 
+                             MouseInterface* mouseInterface, 
+                             KeyboardInterface* keyboardInterface) {
         
         this->mouseInterface = mouseInterface;
+        this->keyboardInterface = keyboardInterface;
         
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             std::cerr << __func__ << ": failed to init SDL: " << SDL_GetError() << std::endl;
@@ -64,14 +72,13 @@ public:
     inline virtual void Update(float inDeltaTime) {
         SDL_Event e;
         spaceKeyReleased = false;
+        for (int i = 0; i < int(KeyboardCode::MAX_KEYS); ++i) {
+            KeyboardCode k = (KeyboardCode)i;
+            keyboardInterface->SetKeyPressed(k, false);
+        }
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 quit = true;
-            }
-            else if (e.type == SDL_KEYUP) {
-                if (e.key.keysym.sym == SDLK_SPACE) {
-                    spaceKeyReleased = true;
-                }
             }
             else if (e.type == SDL_MOUSEBUTTONDOWN) {
                 switch (e.button.button)
@@ -99,6 +106,20 @@ public:
                 int mouseX = e.motion.x;
                 int mouseY = e.motion.y;
                 mouseInterface->SetMousePos(mouseX, mouseY);
+            }
+            else if (e.type == SDL_KEYDOWN) {
+                KeyboardCode k;
+                if (SDLKeyToKeyboardCode(e.key.keysym.sym, k)) {
+                    keyboardInterface->SetKeyHeldDown(k, true);
+                    keyboardInterface->SetKeyPressed(k, false);
+                }
+            }
+            else if (e.type == SDL_KEYUP) {
+                KeyboardCode k;
+                if (SDLKeyToKeyboardCode(e.key.keysym.sym, k)) {
+                    keyboardInterface->SetKeyHeldDown(k, false);
+                    keyboardInterface->SetKeyPressed(k, true);
+                }
             }
         }
 
@@ -128,8 +149,30 @@ private:
     SDL_Window* window;
     SDL_GLContext gc;
     MouseInterface* mouseInterface;
+    KeyboardInterface* keyboardInterface;
     bool quit;
     bool spaceKeyReleased;
+    
+    inline bool SDLKeyToKeyboardCode(SDL_Keycode sdlKey, KeyboardCode& res)
+    {
+        static std::map<SDL_Keycode, KeyboardCode> keyMap = {
+            { SDLK_UP, KeyboardCode::UP },
+            { SDLK_DOWN, KeyboardCode::DOWN },
+            { SDLK_LEFT, KeyboardCode::LEFT },
+            { SDLK_RIGHT, KeyboardCode::RIGHT },
+            { SDLK_w, KeyboardCode::W },
+            { SDLK_a, KeyboardCode::A },
+            { SDLK_s, KeyboardCode::S },
+            { SDLK_d, KeyboardCode::D }
+        };
+        
+        if (keyMap.count(sdlKey) > 0) {
+            res = keyMap[sdlKey];
+            return true;
+        }
+        
+        return false;
+    }
 };
 
 #endif // WINDOW_H_INCLUDED

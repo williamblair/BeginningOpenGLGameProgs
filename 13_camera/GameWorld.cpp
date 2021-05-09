@@ -17,6 +17,7 @@ GameWorld::GameWorld() :
     heightMap(nullptr),
     camera(nullptr),
     mouseInterface(nullptr),
+    keyboardInterface(nullptr),
     lastSpawnTime(0),
     currentTime(0),
     projMat(nullptr),
@@ -104,6 +105,7 @@ void GameWorld::Update(float dt)
     // TODO - respawn enemy entities
 
     updateRelMousePos(dt);
+    updateKeyboardMovement(dt);
 }
 
 void GameWorld::Render()
@@ -290,4 +292,20 @@ void GameWorld::updateRelMousePos(const float dt)
         camera->AddYaw(x * 40.0f * dt);
         camera->AddPitch(y * -40.0f * dt);
     }
+}
+
+void GameWorld::updateKeyboardMovement(const float dt)
+{
+    static const float MOVE_SPEED = 2.0f;
+    
+    // TODO - move this within player class
+    if (keyboardInterface->IsKeyHeldDown(KeyboardCode::W) ||
+        keyboardInterface->IsKeyHeldDown(KeyboardCode::UP)) {
+        camera->MoveForward(MOVE_SPEED * dt);
+    }
+    else if (keyboardInterface->IsKeyHeldDown(KeyboardCode::S) ||
+             keyboardInterface->IsKeyHeldDown(KeyboardCode::DOWN)) {
+        camera->MoveForward(-MOVE_SPEED * dt);
+    }
+    
 }

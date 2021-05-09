@@ -15,6 +15,7 @@
 #include <Explosion.h>
 #include <GameWorld.h>
 #include <MouseInterface.h>
+#include <KeyboardInterface.h>
 
 #ifdef __WIN32
 #undef main
@@ -70,13 +71,17 @@ inline void PrintAnim(const std::string& name, FreetypeFont& f)
 
 int main(int argc, char *argv[])
 {
-    Window          window;
-    MouseInterface  mouseInterface;
-    FreetypeFont    font("assets/LiberationSans-Regular.ttf", S_WIDTH, S_HEIGHT, 24);
-    GameTimer       gameTimer;
-    GameWorld       world;
+    Window            window;
+    MouseInterface    mouseInterface;
+    KeyboardInterface keyboardInterface;
+    FreetypeFont      font("assets/LiberationSans-Regular.ttf", S_WIDTH, S_HEIGHT, 24);
+    GameTimer         gameTimer;
+    GameWorld         world;
 
-    if (!window.Init("Hello World", S_WIDTH, S_HEIGHT, &mouseInterface)) {
+    if (!window.Init("Hello World",
+                    S_WIDTH, S_HEIGHT, 
+                    &mouseInterface, 
+                    &keyboardInterface)) {
         return 1;
     }
     GLuint gVAO = 0;
@@ -105,6 +110,7 @@ int main(int argc, char *argv[])
 
     world.SetProjectionMatrix(&projectionMatrix);
     world.SetMouseInterface(&mouseInterface);
+    world.SetKeyboardInterface(&keyboardInterface);
     world.SetScreenWidth(float(S_WIDTH));
     world.SetScreenHeight(float(S_HEIGHT));
 

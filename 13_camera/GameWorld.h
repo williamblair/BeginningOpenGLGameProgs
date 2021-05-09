@@ -8,6 +8,7 @@
 #include <EntityType.h>
 #include <Camera.h>
 #include <MouseInterface.h>
+#include <KeyboardInterface.h>
 
 // forward declaration
 class HeightMap;
@@ -37,6 +38,13 @@ public:
     MouseInterface* GetMouseInterface() {
         return mouseInterface;
     }
+    
+    void SetKeyboardInterface(KeyboardInterface* keyboardInterface) {
+        this->keyboardInterface = keyboardInterface;
+    }
+    KeyboardInterface* GetKeyboardInterface() {
+        return keyboardInterface;
+    }
 
     HeightMap* GetHeightMap() { return heightMap; }
     
@@ -63,6 +71,7 @@ private:
     HeightMap* heightMap;
     Camera* camera;
     MouseInterface* mouseInterface;
+    KeyboardInterface* keyboardInterface;
 
     static const int MAX_ENEMY_COUNT = 60;
     static const int TREE_COUNT = 30;
@@ -85,6 +94,7 @@ private:
     void clearDeadEntities();
     Vec3 getRandomPosition();
     void updateRelMousePos(const float dt);
+    void updateKeyboardMovement(const float dt);
 };
 
 #endif // GAME_WORLD_H_INCLUDED

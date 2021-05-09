@@ -1,6 +1,2 @@
-Init GLEW, version: 2.1.0
-Keyframes size setvertices: 199
-tex coord offset:900
-header num tex coords: 469
-Bad file after read tex coords
-  read: 1004
+C:/MinGW/bin/mingw32-g++ -std=c++11 -g -DGLEW_STATIC main.o Shader.o HeightMap.o TargaImage.o Tree.o FreetypeFont.o Md2Model.o Explosion.o GameWorld.o Entity.o Enemy.o Ogro.o Collider.o SphereCollider.o TerrainCollider.o Camera.o MouseInterface.o   -o main -I. -I.. -LC:/MinGW/lib -lmingw32 -lSDL2 -lopengl32 -lglew32 -lfreetype
+Makefile.windows:26: recipe for target 'all' failed

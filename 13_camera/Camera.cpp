@@ -62,6 +62,18 @@ void Camera::AddPitch(const float degrees)
 {
 }
 
+void Camera::MoveForward(const float speed)
+{
+    float yawRad = deg2rad(yaw);
+    float cosYaw = cosf(yawRad);
+    float sinYaw = sinf(yawRad);
+    
+    position.x += cosYaw * speed;
+    position.z += sinYaw * speed;
+    
+    UpdateMatrix();
+}
+
 void Camera::UpdateMatrix()
 {
     if (attachedEntity != nullptr)
