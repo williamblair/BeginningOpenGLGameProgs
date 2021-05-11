@@ -1,4 +1,4 @@
-MINGW_DIR=C:/MinGW
+MINGW_DIR=D:/MinGW
 CC=$(MINGW_DIR)/bin/mingw32-g++
 CFLAGS=-std=c++11 -g
 INCDIRS=-I. -I..
@@ -30,5 +30,5 @@ all: $(OBJS)
 	$(CC) $(CFLAGS) -c -o $@ $< $(INCDIRS)
 
 clean:
-	del *.o
+	rm -f *.o
 
